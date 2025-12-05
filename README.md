@@ -1,0 +1,310 @@
+# Open Unified TTS
+
+An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with smart chunking for unlimited-length generation.
+
+**[Listen to the Demo](demo/demo.mp3)** - Multi-voice narration showcasing Morgan Freeman, Rick, and Morty explaining how it works. Background music generated with [ACE-Step](https://github.com/ace-step/ACE-Step), a musical TTS model.
+
+> **Note on demo quality:** The voice clones in our demo are quick samples, not production-tuned. Your clones will only be as good as your reference audio and backend models. With proper voice samples and tuning, results can be significantly better. Don't judge the architecture by our hasty demo voices!
+
+> **Extensibility:** Any TTS or audio generation model with an API can plug in as a backend. Voice cloning, emotion synthesis, even musical TTS (yes, rapping AI is a thing). If it has an endpoint, it can join the party.
+
+> **Instant Integration:** Because this is OpenAI TTS-compatible, it plugs directly into tools you already use - [OpenWebUI](https://github.com/open-webui/open-webui), [SillyTavern](https://github.com/SillyTavern/SillyTavern), or any app with OpenAI TTS support. Point them at this API, connect your backends (Higgs Audio, VoxCPM, ElevenLabs, whatever), and you've got a production audio studio. No code changes needed.
+
+## Why This Exists
+
+Most TTS models have strict length limits:
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                   RAW MODEL LIMITATIONS                    │
+├────────────────────────────────────────────────────────────┤
+│  Model Type          │  Max Words  │  Max Chars  │        │
+├──────────────────────┼─────────────┼─────────────┤        │
+│  Voice Clones        │  ~75        │  ~400       │        │
+│  (VoxCPM, OpenAudio) │             │             │        │
+├──────────────────────┼─────────────┼─────────────┤        │
+│  Emotion Models      │  ~40        │  ~250       │        │
+│  (Kyutai/Moshi)      │             │             │        │
+├──────────────────────┼─────────────┼─────────────┤        │
+│  Generative          │  ~100       │  ~600       │        │
+│  (Higgs)             │             │             │        │
+├──────────────────────┼─────────────┼─────────────┤        │
+│  Cloud APIs          │  ~2500      │  ~15000     │        │
+│  (ElevenLabs)        │             │             │        │
+└────────────────────────────────────────────────────────────┘
+
+Beyond these limits: quality degrades, audio cuts off, or errors.
+```
+
+**Open Unified TTS solves this** by chunking text intelligently, generating each chunk within model limits, and stitching the results seamlessly.
+
+## How It Works
+
+```
+INPUT: 2000-word article + "morgan" voice
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────────┐
+│  1. SMART CHUNKING                                          │
+│                                                             │
+│  Full text split at natural boundaries:                     │
+│  • Sentence endings                                         │
+│  • Paragraph breaks                                         │
+│  • Never mid-word                                           │
+│                                                             │
+│  Chunk size based on backend profile (optimal < max)        │
+│                                                             │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐           │
+│  │ Chunk 1 │ │ Chunk 2 │ │ Chunk 3 │ │ Chunk N │           │
+│  │ ~50 wds │ │ ~50 wds │ │ ~50 wds │ │ ~50 wds │           │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. GENERATE EACH CHUNK                                     │
+│                                                             │
+│  Each chunk sent to backend (within its limits)             │
+│                                                             │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐           │
+│  │ Audio 1 │ │ Audio 2 │ │ Audio 3 │ │ Audio N │           │
+│  │  ~5 sec │ │  ~5 sec │ │  ~5 sec │ │  ~5 sec │           │
+│  └─────────┘ └─────────┘ └─────────┘ └─────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. STITCH WITH CROSSFADE                                   │
+│                                                             │
+│  Audio chunks joined with crossfade to eliminate seams:     │
+│                                                             │
+│  ──────┐                                                    │
+│        ╲  ← crossfade (50ms)                                │
+│         ╲──────┐                                            │
+│                ╲                                            │
+│                 ╲──────                                     │
+│                                                             │
+│  Result: Seamless audio, indistinguishable from single gen  │
+└─────────────────────────────────────────────────────────────┘
+                    │
+                    ▼
+OUTPUT: Single audio file, unlimited length, consistent voice
+```
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     YOUR APPLICATION                        │
+│              (Any OpenAI TTS compatible client)             │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          │ POST /v1/audio/speech
+                          │ {"voice": "morgan", "input": "..."}
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   OPEN UNIFIED TTS                          │
+│                                                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │   Router    │  │   Chunker   │  │  Stitcher   │         │
+│  │             │  │             │  │             │         │
+│  │ • Backend   │  │ • Smart     │  │ • Crossfade │         │
+│  │   selection │  │   splitting │  │ • Normalize │         │
+│  │ • Failover  │  │ • Profile-  │  │ • Format    │         │
+│  │ • Voice     │  │   aware     │  │   convert   │         │
+│  │   prefs     │  │             │  │             │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          │               │               │
+          ▼               ▼               ▼
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│  Backend 1  │  │  Backend 2  │  │  Backend N  │
+│  (VoxCPM)   │  │  (Higgs)    │  │ (ElevenLabs)│
+│             │  │             │  │             │
+│  Voice      │  │  Generative │  │  Cloud      │
+│  Clones     │  │  Scenes     │  │  Fallback   │
+└─────────────┘  └─────────────┘  └─────────────┘
+```
+
+## Quick Start
+
+### 1. Configure Environment
+
+```bash
+cp .env.example .env
+# Edit .env with your backend URLs and API keys
+```
+
+### 2. Set Up Voice Directory
+
+```bash
+mkdir -p ~/.unified-tts/voices
+
+# Add voice clones (reference audio + transcript)
+mkdir ~/.unified-tts/voices/morgan
+cp morgan_sample.wav ~/.unified-tts/voices/morgan/reference.wav
+echo "The transcription of the reference audio" > ~/.unified-tts/voices/morgan/transcript.txt
+```
+
+### 3. Start Server
+
+```bash
+pip install -r requirements.txt
+python server.py
+```
+
+### 4. Generate Speech
+
+```bash
+# Using curl
+curl -X POST http://localhost:8765/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -d '{"voice": "morgan", "input": "Your text here, any length."}' \
+  --output speech.mp3
+
+# Using OpenAI Python client
+from openai import OpenAI
+client = OpenAI(base_url="http://localhost:8765/v1", api_key="unused")
+
+audio = client.audio.speech.create(
+    model="tts-1",
+    voice="morgan",
+    input="Your text here, any length."
+)
+audio.stream_to_file("speech.mp3")
+```
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/v1/audio/speech` | POST | Generate speech (OpenAI-compatible) |
+| `/v1/voices` | GET | List available voices |
+| `/v1/backends` | GET | List backends and status |
+| `/v1/backends/switch` | POST | Set preferred backend |
+| `/v1/voice-prefs` | GET | Get voice→backend preferences |
+| `/v1/voice-prefs/{voice}` | POST | Set backend preference for voice |
+| `/v1/models` | GET | List models (OpenAI-compatible) |
+| `/health` | GET | Health check |
+
+## Backend Profiles
+
+Each backend has a profile defining its capabilities:
+
+```python
+# backend_profiles.py
+"voxcpm": {
+    "max_words": 75,       # Hard limit
+    "max_chars": 400,
+    "optimal_words": 50,   # Target for chunking
+    "needs_chunking": True,
+    "crossfade_ms": 50,    # Stitch overlap
+}
+```
+
+The chunker uses these profiles to split text appropriately for each backend.
+
+## Voice Preferences
+
+Route specific voices to specific backends for optimal quality:
+
+```bash
+# Set morgan to always use voxcpm (best quality for this clone)
+curl -X POST http://localhost:8765/v1/voice-prefs/morgan \
+  -H "Content-Type: application/json" \
+  -d '{"backend": "voxcpm"}'
+```
+
+Preferences are stored in `~/.unified-tts/voice_prefs.json`.
+
+## Supported Backends
+
+| Backend | Type | Description |
+|---------|------|-------------|
+| `openaudio` | Voice Clone | Fish Speech / OpenAudio containers |
+| `voxcpm` | Voice Clone | VoxCPM voice cloning |
+| `kyutai` | Emotion | Kyutai/Moshi emotional voices |
+| `higgs` | Generative | Scene-based voice generation |
+| `vibevoice` | Voice Clone | VibeVoice backend |
+| `elevenlabs` | Cloud | ElevenLabs API (fallback) |
+
+## Configuration
+
+All configuration via environment variables:
+
+```bash
+# Backend URLs
+OPENAUDIO_URL=http://localhost:8080
+VOXCPM_URL=http://localhost:7860
+KYUTAI_URL=http://localhost:8086
+HIGGS_URL=http://localhost:8085
+VIBEVOICE_URL=http://localhost:8087
+
+# Cloud API keys
+ELEVENLABS_API_KEY=sk_...
+
+# Server settings
+UNIFIED_TTS_PORT=8765
+UNIFIED_TTS_HOST=0.0.0.0
+
+# Voice directory
+UNIFIED_TTS_VOICE_DIR=~/.unified-tts/voices
+```
+
+## Directory Structure
+
+```
+open-unified-tts/
+├── server.py           # FastAPI application
+├── router.py           # Backend selection & failover
+├── chunker.py          # Smart text splitting
+├── stitcher.py         # Audio concatenation
+├── voices.py           # Voice clone discovery
+├── voice_prefs.py      # Per-voice backend routing
+├── backend_profiles.py # Backend capabilities
+├── config.py           # Environment configuration
+└── adapters/
+    ├── base.py         # Abstract backend interface
+    ├── openaudio.py    # OpenAudio/Fish Speech
+    ├── voxcpm.py       # VoxCPM
+    ├── kyutai.py       # Kyutai/Moshi
+    ├── higgs.py        # Higgs Audio
+    ├── vibevoice.py    # VibeVoice
+    └── elevenlabs.py   # ElevenLabs cloud
+```
+
+## Why Chunking + Stitching?
+
+**The Problem:**
+```
+You: "Read me this 2000-word article in Morgan Freeman's voice"
+Raw Model: "I can only do 75 words at a time" 💥
+```
+
+**The Solution:**
+```
+Open Unified TTS:
+1. Splits into 40 chunks of ~50 words each
+2. Generates each chunk (within model limits)
+3. Crossfades chunks together (eliminates seams)
+4. Returns single seamless audio file
+
+You get: 15-minute narration, consistent voice, no quality loss
+```
+
+**Why Crossfade?**
+```
+Without crossfade:          With crossfade:
+─────┐ ┌─────               ─────╲ ╱─────
+     │ │      ← click!           ╳      ← smooth
+─────┘ └─────               ─────╱ ╲─────
+```
+
+The 50ms crossfade eliminates audible clicks between chunks while preserving natural speech rhythm.
+
+## License
+
+Apache License 2.0 - See LICENSE file.

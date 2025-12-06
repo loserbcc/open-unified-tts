@@ -4,9 +4,9 @@ An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with 
 
 **Tested Backends:** Kokoro, VibeVoice, OpenAudio S1-mini, FishTTS, VoxCPM, MiniMax TTS, Chatterbox, Higgs Audio, Kyutai/Moshi
 
-**[Listen to the Demo](demo/demo.mp3)** - Multi-voice narration showcasing Morgan Freeman, Rick, and Morty explaining how it works. Background music generated with [ACE-Step](https://github.com/ace-step/ACE-Step), a musical TTS model.
+**[Watch the Intro](demo/intro.mp4)** - 30-second overview of what this does.
 
-> **Note on demo quality:** The voice clones in our demo are quick samples, not production-tuned. Your clones will only be as good as your reference audio and backend models. With proper voice samples and tuning, results can be significantly better. Don't judge the architecture by our hasty demo voices!
+**[Rough Demo (bad voice samples)](demo/demo_rough_samples.mp3)** - Multi-voice narration with Morgan Freeman, Rick, and Morty. Uses hastily-grabbed voice samples - your results will be better with proper reference audio.
 
 > **Extensibility:** Any TTS or audio generation model with an API can plug in as a backend. Voice cloning, emotion synthesis, even musical TTS (yes, rapping AI is a thing). If it has an endpoint, it can join the party.
 

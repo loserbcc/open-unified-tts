@@ -2,6 +2,8 @@
 
 How to add Kokoro TTS as a backend for Open Unified TTS.
 
+**Listen to what this produces:** [Audiobook Demo (73 seconds)](../demo/kokoro_audiobook_demo.mp3) - Generated with `bf_emma` voice from a 230-word story. [Details](../demo/kokoro_demo_info.md)
+
 ## Prerequisites
 
 - Docker installed

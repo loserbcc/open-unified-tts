@@ -130,6 +130,27 @@ curl -X POST http://localhost:8765/v1/audio/speech \
 
 **[Full Kokoro Setup Guide →](docs/kokoro_setup_guide.md)**
 
+## Web Interface (Optional)
+
+Prefer a GUI over command line? The **Audiobook Production Studio** provides a Gradio web interface for document-to-audiobook conversion.
+
+```bash
+# Install additional dependencies
+pip install gradio pypdf python-docx
+
+# Start the web interface (after server.py is running)
+python gradio_studio.py --port 7865
+```
+
+**Features:**
+- Upload PDF, DOCX, or TXT files
+- Edit extracted text before generation
+- 50+ voices organized by category
+- Multiple output formats (MP3, WAV, FLAC, Opus)
+- Real-time API status monitoring
+
+**Coming soon:** OCR support for scanned documents (modular plugin architecture)
+
 ## How It Works
 
 ```

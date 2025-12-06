@@ -11,6 +11,8 @@ requests>=2.31.0
 
 # Audio processing
 pydub>=0.25.1
+numpy>=1.24.0
+scipy>=1.11.0
 
 # Environment configuration
 python-dotenv>=1.0.0

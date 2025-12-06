@@ -1,0 +1,18 @@
+# TUI Client Dependencies for Open Unified TTS
+
+# Core TUI framework
+textual>=0.63.0
+
+# Async HTTP client
+httpx>=0.25.0
+
+# Rich text formatting (comes with textual but listed for clarity)
+rich>=13.0.0
+
+# Optional: For future OCR plugin
+# pytesseract>=0.3.10
+# Pillow>=10.0.0
+
+# Optional: For future AI Director plugin
+# anthropic>=0.18.0
+# openai>=1.0.0

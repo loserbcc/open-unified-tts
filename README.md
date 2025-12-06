@@ -6,7 +6,9 @@ An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with 
 
 **[Watch the Intro](demo/intro.mp4)** - 30-second overview of what this does.
 
-**[Rough Demo (bad voice samples)](demo/demo_rough_samples.mp3)** - Multi-voice narration with Morgan Freeman, Rick, and Morty. Uses hastily-grabbed voice samples - your results will be better with proper reference audio.
+**[Live Demo (4 min)](demo/live_demo.mp4)** - Screen recording showing the chunking and stitching in action with multi-voice narration.
+
+**[Rough Demo Audio (bad voice samples)](demo/demo_rough_samples.mp3)** - Audio-only version. Uses hastily-grabbed voice samples - your results will be better with proper reference audio.
 
 > **Extensibility:** Any TTS or audio generation model with an API can plug in as a backend. Voice cloning, emotion synthesis, even musical TTS (yes, rapping AI is a thing). If it has an endpoint, it can join the party.
 

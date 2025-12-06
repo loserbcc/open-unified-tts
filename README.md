@@ -2,6 +2,8 @@
 
 An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with smart chunking for unlimited-length generation.
 
+**Tested Backends:** Kokoro, VibeVoice, OpenAudio S1-mini, FishTTS, VoxCPM, MiniMax TTS, Higgs Audio, ElevenLabs, Kyutai/Moshi
+
 **[Listen to the Demo](demo/demo.mp3)** - Multi-voice narration showcasing Morgan Freeman, Rick, and Morty explaining how it works. Background music generated with [ACE-Step](https://github.com/ace-step/ACE-Step), a musical TTS model.
 
 > **Note on demo quality:** The voice clones in our demo are quick samples, not production-tuned. Your clones will only be as good as your reference audio and backend models. With proper voice samples and tuning, results can be significantly better. Don't judge the architecture by our hasty demo voices!
@@ -224,12 +226,26 @@ Preferences are stored in `~/.unified-tts/voice_prefs.json`.
 
 | Backend | Type | Description |
 |---------|------|-------------|
-| `openaudio` | Voice Clone | Fish Speech / OpenAudio containers |
+| `openaudio` | Voice Clone | Fish Speech / OpenAudio S1-mini containers |
 | `voxcpm` | Voice Clone | VoxCPM voice cloning |
+| `fishtts` | Voice Clone | FishTTS voice synthesis |
+| `kokoro` | Neural TTS | Kokoro high-quality neural voices |
 | `kyutai` | Emotion | Kyutai/Moshi emotional voices |
-| `higgs` | Generative | Scene-based voice generation |
-| `vibevoice` | Voice Clone | VibeVoice backend |
+| `higgs` | Generative | Higgs Audio scene-based voice generation |
+| `vibevoice` | Streaming | Microsoft VibeVoice real-time TTS |
+| `minimax` | Cloud | MiniMax TTS professional voices |
 | `elevenlabs` | Cloud | ElevenLabs API (fallback) |
+
+### Backend Compatibility Notes
+
+- **Kokoro**: Excellent quality neural TTS, fast inference
+- **VibeVoice**: Microsoft's streaming TTS (Dec 2025), works on CPU
+- **OpenAudio S1-mini**: Compact voice cloning model
+- **FishTTS**: Fish Speech voice synthesis
+- **VoxCPM**: High-quality voice cloning with reference audio
+- **MiniMax TTS**: Cloud API with professional voice presets
+- **Higgs Audio**: Generative voices via scene descriptions
+- **Kyutai/Moshi**: Emotional expression synthesis
 
 ## Configuration
 
@@ -239,11 +255,14 @@ All configuration via environment variables:
 # Backend URLs
 OPENAUDIO_URL=http://localhost:8080
 VOXCPM_URL=http://localhost:7860
+FISHTTS_URL=http://localhost:7861
+KOKORO_URL=http://localhost:8880
 KYUTAI_URL=http://localhost:8086
 HIGGS_URL=http://localhost:8085
 VIBEVOICE_URL=http://localhost:8087
 
 # Cloud API keys
+MINIMAX_API_KEY=your_minimax_key
 ELEVENLABS_API_KEY=sk_...
 
 # Server settings
@@ -268,11 +287,14 @@ open-unified-tts/
 ├── config.py           # Environment configuration
 └── adapters/
     ├── base.py         # Abstract backend interface
-    ├── openaudio.py    # OpenAudio/Fish Speech
-    ├── voxcpm.py       # VoxCPM
-    ├── kyutai.py       # Kyutai/Moshi
-    ├── higgs.py        # Higgs Audio
-    ├── vibevoice.py    # VibeVoice
+    ├── openaudio.py    # OpenAudio/Fish Speech S1-mini
+    ├── voxcpm.py       # VoxCPM voice cloning
+    ├── fishtts.py      # FishTTS
+    ├── kokoro.py       # Kokoro neural TTS
+    ├── kyutai.py       # Kyutai/Moshi emotions
+    ├── higgs.py        # Higgs Audio generative
+    ├── vibevoice.py    # Microsoft VibeVoice
+    ├── minimax.py      # MiniMax TTS cloud
     └── elevenlabs.py   # ElevenLabs cloud
 ```
 

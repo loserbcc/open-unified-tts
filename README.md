@@ -12,6 +12,8 @@ An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with 
 
 **[Rough Demo Audio (bad voice samples)](demo/demo_rough_samples.mp3)** - Audio-only version. Uses hastily-grabbed voice samples - your results will be better with proper reference audio.
 
+**[Project Explanation (audio)](demo/project_explanation.mp3)** - What is this? How does it work? This audio was generated using the unified TTS system itself. Have questions or a specific use case? [Open an issue](https://github.com/loserbcc/open-unified-tts/issues) - tell me what you need and we'll figure it out together!
+
 ## 🚀 Start Here: Kokoro (Easiest Setup)
 
 **New to this project?** Start with Kokoro - 50+ built-in voices, runs on CPU, no reference audio needed.

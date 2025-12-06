@@ -534,7 +534,13 @@ class TTSClientApp(App):
         await self.action_import_file()
 
     async def action_import_file(self) -> None:
-        """Import text from a file."""
+        """Import text from a file.
+
+        NOTE: This feature is experimental/in-development.
+        - Requires zenity for GUI file picker (Linux)
+        - PDF support requires: pip install pypdf
+        - DOCX support requires: pip install python-docx
+        """
         # Simple file path input - prompt user
         from pathlib import Path
         import subprocess

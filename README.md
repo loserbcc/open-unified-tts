@@ -151,6 +151,36 @@ python gradio_studio.py --port 7865
 
 **Coming soon:** OCR support for scanned documents (modular plugin architecture)
 
+## TUI Client (Experimental)
+
+A terminal-based interface for text-to-speech generation using the Textual framework.
+
+> **⚠️ Status:** Work-in-progress concept. Core TTS generation works, but some features (like file import) need testing/development.
+
+```bash
+# Install TUI dependencies
+pip install textual httpx rich
+
+# Start the server first, then run TUI
+python tui_client.py
+```
+
+**Controls:**
+- `Ctrl+G` - Generate speech from text input
+- `Ctrl+R` - Refresh API status and voices
+- `Ctrl+O` - Import file (experimental - requires zenity)
+- `Ctrl+Q` - Quit
+
+**Features:**
+- Voice selection grouped by category
+- Output format selection (MP3, WAV, FLAC, Opus)
+- Auto-play toggle for generated audio
+- Real-time API health monitoring
+
+**Known Limitations:**
+- File import feature is in development (PDF/DOCX support requires additional packages)
+- Designed for Kokoro backend - other backends may need testing
+
 ## How It Works
 
 ```

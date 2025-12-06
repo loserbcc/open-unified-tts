@@ -563,8 +563,8 @@ class TTSClientApp(App):
                     self.update_status(f"Plugin error ({plugin.name}): {str(e)}")
                     return
 
-        # Generate audio
-        await self._generate_audio(processed_text, selected_voice, audio_format)
+        # Generate audio (no await - @work handles scheduling)
+        self._generate_audio(processed_text, selected_voice, audio_format)
 
     @work(exclusive=True)
     async def _generate_audio(self, text: str, voice: str, format: str) -> None:

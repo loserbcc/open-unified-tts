@@ -42,6 +42,26 @@ Beyond these limits: quality degrades, audio cuts off, or errors.
 
 **Open Unified TTS solves this** by chunking text intelligently, generating each chunk within model limits, and stitching the results seamlessly.
 
+### The Community Has Been Asking
+
+This isn't a solution looking for a problem. A quick search across Reddit shows hundreds of posts from people hitting these exact limitations:
+
+| Community | What They're Asking |
+|-----------|---------------------|
+| r/LocalLLaMA | *"any opensource TTS without limit on character and can clone voice?"* (14+ upvotes) |
+| r/elevenlabs | 50+ posts about character limits and workarounds |
+| r/TextToSpeech | Multiple threads on long-form audio generation |
+| r/SillyTavern | TTS cutting off mid-sentence in roleplay |
+| r/selfhosted | Requests for unlimited local TTS solutions |
+
+Common pain points:
+- **"Text too long"** errors when generating audiobooks or articles
+- **Voice clone quality degrading** after ~75 words
+- **No seamless way** to stitch multiple generations together
+- **Wanting one API** that works with multiple backends
+
+If you've hit any of these walls, you're in the right place.
+
 ## How It Works
 
 ```

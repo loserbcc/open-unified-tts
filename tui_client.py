@@ -455,7 +455,7 @@ class TTSClientApp(App):
     async def on_mount(self) -> None:
         """Handle application mount - check API and load voices."""
         self.update_status("Checking API...")
-        await self.check_api_health()
+        self.check_api_health()  # @work decorator handles async scheduling
 
     @work(exclusive=True)
     async def check_api_health(self) -> None:

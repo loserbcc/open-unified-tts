@@ -2,7 +2,7 @@
 
 An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with smart chunking for unlimited-length generation.
 
-**Tested Backends:** Kokoro, VibeVoice, OpenAudio S1-mini, FishTTS, VoxCPM, MiniMax TTS, Higgs Audio, ElevenLabs, Kyutai/Moshi
+**Tested Backends:** Kokoro, VibeVoice, OpenAudio S1-mini, FishTTS, VoxCPM, MiniMax TTS, Chatterbox, Higgs Audio, ElevenLabs, Kyutai/Moshi
 
 **[Listen to the Demo](demo/demo.mp3)** - Multi-voice narration showcasing Morgan Freeman, Rick, and Morty explaining how it works. Background music generated with [ACE-Step](https://github.com/ace-step/ACE-Step), a musical TTS model.
 
@@ -230,6 +230,7 @@ Preferences are stored in `~/.unified-tts/voice_prefs.json`.
 | `voxcpm` | Voice Clone | VoxCPM voice cloning |
 | `fishtts` | Voice Clone | FishTTS voice synthesis |
 | `kokoro` | Neural TTS | Kokoro high-quality neural voices |
+| `chatterbox` | Voice Clone | Chatterbox TTS with emotion control |
 | `kyutai` | Emotion | Kyutai/Moshi emotional voices |
 | `higgs` | Generative | Higgs Audio scene-based voice generation |
 | `vibevoice` | Streaming | Microsoft VibeVoice real-time TTS |
@@ -239,6 +240,7 @@ Preferences are stored in `~/.unified-tts/voice_prefs.json`.
 ### Backend Compatibility Notes
 
 - **Kokoro**: Excellent quality neural TTS, fast inference
+- **Chatterbox**: Voice cloning with emotion/exaggeration control
 - **VibeVoice**: Microsoft's streaming TTS (Dec 2025), works on CPU
 - **OpenAudio S1-mini**: Compact voice cloning model
 - **FishTTS**: Fish Speech voice synthesis

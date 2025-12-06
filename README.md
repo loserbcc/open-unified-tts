@@ -12,6 +12,18 @@ An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with 
 
 **[Rough Demo Audio (bad voice samples)](demo/demo_rough_samples.mp3)** - Audio-only version. Uses hastily-grabbed voice samples - your results will be better with proper reference audio.
 
+## 🚀 Start Here: Kokoro (Easiest Setup)
+
+**New to this project?** Start with Kokoro - 50+ built-in voices, runs on CPU, no reference audio needed.
+
+1. `docker run -d -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:latest`
+2. `pip install -r requirements.txt && python server.py`
+3. Generate: `curl -X POST http://localhost:8765/v1/audio/speech -d '{"voice":"bf_emma","input":"Hello world"}' -o test.mp3`
+
+**[📖 Full Kokoro Setup Guide](docs/kokoro_setup_guide.md)** | **[🎧 Listen to Sample Output](demo/kokoro_audiobook_demo.mp3)**
+
+---
+
 > **Extensibility:** Any TTS or audio generation model with an API can plug in as a backend. Voice cloning, emotion synthesis, even musical TTS (yes, rapping AI is a thing). If it has an endpoint, it can join the party.
 
 > **Instant Integration:** Because this is OpenAI TTS-compatible, it plugs directly into tools you already use - [OpenWebUI](https://github.com/open-webui/open-webui), [SillyTavern](https://github.com/SillyTavern/SillyTavern), or any app with OpenAI TTS support. Point them at this API, connect your backends (Higgs Audio, VoxCPM, ElevenLabs, whatever), and you've got a production audio studio. No code changes needed.

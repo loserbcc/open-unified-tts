@@ -2,7 +2,7 @@
 
 An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with smart chunking for unlimited-length generation.
 
-**Tested Backends:** Kokoro, VibeVoice, OpenAudio S1-mini, FishTTS, VoxCPM, MiniMax TTS, Chatterbox, Higgs Audio, Kyutai/Moshi
+**Tested Backends:** Kokoro, VibeVoice, OpenAudio S1-mini, FishTTS, VoxCPM, MiniMax TTS, Chatterbox, Higgs Audio, Kyutai/Moshi, ACE-Step (singing/musical TTS)
 
 **[Watch the Intro](demo/intro.mp4)** - 30-second overview of what this does.
 
@@ -237,6 +237,7 @@ Preferences are stored in `~/.unified-tts/voice_prefs.json`.
 | `higgs` | Generative | Higgs Audio scene-based voice generation |
 | `vibevoice` | Streaming | Microsoft VibeVoice real-time TTS |
 | `minimax` | Cloud | MiniMax TTS professional voices |
+| `acestep` | Musical | ACE-Step singing/musical TTS |
 | `elevenlabs` | Cloud | ElevenLabs API (fallback) |
 
 ### Backend Compatibility Notes
@@ -250,6 +251,7 @@ Preferences are stored in `~/.unified-tts/voice_prefs.json`.
 - **MiniMax TTS**: Cloud API with professional voice presets
 - **Higgs Audio**: Generative voices via scene descriptions
 - **Kyutai/Moshi**: Emotional expression synthesis
+- **ACE-Step**: Singing and musical TTS generation
 
 ## Configuration
 

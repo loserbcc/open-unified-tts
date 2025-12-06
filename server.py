@@ -130,11 +130,18 @@ async def list_models():
 
 @app.get("/v1/voices")
 async def list_voices():
-    """List all available voices."""
-    return {
-        "voices": voice_manager.list_voices(),
-        "count": len(voice_manager.list_voices()),
-    }
+    """List all available voices from active backend."""
+    try:
+        backend = router.get_active_backend()
+        voices = backend.list_voices()
+        return {
+            "voices": voices,
+            "count": len(voices),
+            "backend": backend.name,
+        }
+    except RuntimeError:
+        # No backend available, return empty
+        return {"voices": [], "count": 0, "backend": None}
 
 
 @app.post("/v1/voices/refresh")

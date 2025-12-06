@@ -75,3 +75,11 @@ class TTSBackend(ABC):
             RuntimeError: If generation fails
         """
         ...
+
+    def list_voices(self) -> list[str]:
+        """List available voices for this backend.
+
+        Returns:
+            List of voice names/identifiers.
+        """
+        return []  # Default: no voices (override in subclasses)

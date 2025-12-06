@@ -130,3 +130,15 @@ class KokoroBackend(TTSBackend):
         )
         response.raise_for_status()
         return response.content
+
+    def list_voices(self) -> list[str]:
+        """Query Kokoro API for available voices."""
+        try:
+            r = requests.get(f"{self.host}/v1/audio/voices", timeout=5)
+            r.raise_for_status()
+            data = r.json()
+            return data.get("voices", [])
+        except Exception as e:
+            logger.warning(f"Failed to fetch voices from Kokoro: {e}")
+            # Fallback to hardcoded list
+            return sorted(KOKORO_VOICES)

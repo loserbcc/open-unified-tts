@@ -6,6 +6,10 @@ This is the main server providing:
 - GET /v1/backends - List backend status
 - Automatic backend failover
 - Smart text chunking for long content
+
+Format Handling:
+- Chunking required: Uses WAV internally for lossless stitching, converts to final format
+- No chunking: Can request final format directly from backend (more efficient)
 """
 import io
 import logging
@@ -41,7 +45,7 @@ voice_prefs = VoicePreferences()
 app = FastAPI(
     title="Open Unified TTS",
     description="OpenAI-compatible TTS API with multiple backend support",
-    version="1.0.0",
+    version="0.1.0",
 )
 
 
@@ -83,7 +87,7 @@ async def root():
 
     return {
         "service": "Open Unified TTS",
-        "version": "1.0.0",
+        "version": "0.1.0",
         "active_backend": active_name,
         "voice_count": len(voice_manager.list_voices()),
         "endpoints": {
@@ -190,7 +194,12 @@ async def delete_voice_pref(voice: str):
 
 @app.post("/v1/audio/speech")
 async def create_speech(request: SpeechRequest):
-    """Generate speech from text (OpenAI-compatible endpoint)."""
+    """Generate speech from text (OpenAI-compatible endpoint).
+
+    Smart format handling:
+    - If chunking needed: generates WAV chunks, stitches, converts to final format
+    - If no chunking: requests final format directly from backend (more efficient)
+    """
     # Import voice lists for special routing
     try:
         from adapters.kyutai import KYUTAI_VOICES
@@ -204,6 +213,10 @@ async def create_speech(request: SpeechRequest):
         from adapters.elevenlabs import ELEVENLABS_VOICES
     except ImportError:
         ELEVENLABS_VOICES = {}
+    try:
+        from adapters.kokoro import KOKORO_VOICES
+    except ImportError:
+        KOKORO_VOICES = set()
 
     voice_lower = request.voice.lower()
 
@@ -219,6 +232,13 @@ async def create_speech(request: SpeechRequest):
         backend = router.get_backend("vibevoice")
         if not backend or not backend.is_available():
             raise HTTPException(503, f"VibeVoice not available for '{request.voice}'")
+        voice_path = voice_lower
+        transcript = ""
+
+    elif voice_lower in KOKORO_VOICES:
+        backend = router.get_backend("kokoro")
+        if not backend or not backend.is_available():
+            raise HTTPException(503, f"Kokoro not available for voice '{request.voice}'")
         voice_path = voice_lower
         transcript = ""
 
@@ -265,39 +285,71 @@ async def create_speech(request: SpeechRequest):
         )
 
         if needs_chunk:
-            logger.info(f"Chunking: {text_words} words for {backend.name}")
+            # Chunking path: must use WAV for lossless stitching
+            logger.info(f"Chunking: {text_words} words into chunks for {backend.name}")
             chunks = chunk_text(request.input, backend.name)
+            logger.info(f"Split into {len(chunks)} chunks")
 
             audio_chunks = []
             for i, chunk in enumerate(chunks):
+                logger.debug(f"Generating chunk {i+1}/{len(chunks)}: {len(chunk)} chars")
                 chunk_audio = backend.generate(
                     text=chunk,
                     voice_path=voice_path,
                     transcript=transcript,
+                    response_format="wav",  # Always WAV for stitching
                 )
                 audio_chunks.append(chunk_audio)
 
             crossfade_ms = backend_profile.get("crossfade_ms", 50)
-            wav_bytes = stitch_audio(audio_chunks, crossfade_ms=crossfade_ms)
+            logger.info(f"Stitching {len(audio_chunks)} chunks with {crossfade_ms}ms crossfade")
+            audio_bytes = stitch_audio(audio_chunks, crossfade_ms=crossfade_ms)
+
+            # Convert from WAV to requested format
+            if request.response_format == "wav":
+                return Response(content=audio_bytes, media_type="audio/wav")
+
+            output_bytes = convert_audio(audio_bytes, request.response_format)
+
         else:
-            logger.info(f"Generating: {len(request.input)} chars via {backend.name}")
-            wav_bytes = backend.generate(
-                text=request.input,
-                voice_path=voice_path,
-                transcript=transcript,
-            )
+            # No chunking: can request final format directly (more efficient)
+            logger.info(f"Direct generation: {len(request.input)} chars via {backend.name} -> {request.response_format}")
 
-        # Return in requested format
-        if request.response_format == "wav":
-            return Response(content=wav_bytes, media_type="audio/wav")
+            # Check if backend supports direct format output
+            direct_formats = {"wav", "mp3"}  # Formats most backends support
+            if request.response_format in direct_formats:
+                audio_bytes = backend.generate(
+                    text=request.input,
+                    voice_path=voice_path,
+                    transcript=transcript,
+                    response_format=request.response_format,
+                )
+                # Return directly without conversion
+                media_types = {
+                    "mp3": "audio/mpeg",
+                    "wav": "audio/wav",
+                }
+                return Response(
+                    content=audio_bytes,
+                    media_type=media_types.get(request.response_format, "audio/mpeg"),
+                )
+            else:
+                # Backend may not support format, generate WAV and convert
+                audio_bytes = backend.generate(
+                    text=request.input,
+                    voice_path=voice_path,
+                    transcript=transcript,
+                    response_format="wav",
+                )
+                output_bytes = convert_audio(audio_bytes, request.response_format)
 
-        output_bytes = convert_audio(wav_bytes, request.response_format)
         media_types = {
             "mp3": "audio/mpeg",
             "opus": "audio/opus",
             "aac": "audio/aac",
             "flac": "audio/flac",
             "pcm": "audio/pcm",
+            "wav": "audio/wav",
         }
         return Response(
             content=output_bytes,
@@ -309,39 +361,57 @@ async def create_speech(request: SpeechRequest):
         raise HTTPException(500, f"Generation failed: {str(e)}")
 
 
-def convert_audio(wav_bytes: bytes, format: str) -> bytes:
-    """Convert WAV bytes to another format using ffmpeg."""
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        f.write(wav_bytes)
-        wav_path = f.name
+def convert_audio(input_bytes: bytes, target_format: str) -> bytes:
+    """Convert audio bytes to another format using ffmpeg.
 
-    output_path = wav_path.replace(".wav", f".{format}")
+    Args:
+        input_bytes: Input audio bytes (WAV or other format)
+        target_format: Target format (mp3, opus, aac, flac, pcm)
+
+    Returns:
+        Converted audio bytes
+    """
+    # Detect input format from magic bytes
+    if input_bytes[:4] == b'RIFF':
+        input_suffix = ".wav"
+    elif input_bytes[:3] == b'ID3' or input_bytes[:2] == b'\xff\xfb':
+        input_suffix = ".mp3"
+    else:
+        input_suffix = ".wav"  # Assume WAV
+
+    with tempfile.NamedTemporaryFile(suffix=input_suffix, delete=False) as f:
+        f.write(input_bytes)
+        input_path = f.name
+
+    output_path = input_path.rsplit('.', 1)[0] + f".{target_format}"
 
     try:
-        cmd = ["ffmpeg", "-y", "-i", wav_path, "-f", format]
+        cmd = ["ffmpeg", "-y", "-i", input_path]
 
-        if format == "mp3":
+        if target_format == "mp3":
             cmd.extend(["-codec:a", "libmp3lame", "-q:a", "2"])
-        elif format == "opus":
+        elif target_format == "opus":
             cmd.extend(["-codec:a", "libopus", "-b:a", "128k"])
-        elif format == "aac":
+        elif target_format == "aac":
             cmd.extend(["-codec:a", "aac", "-b:a", "128k"])
-        elif format == "flac":
+        elif target_format == "flac":
             cmd.extend(["-codec:a", "flac"])
-        elif format == "pcm":
+        elif target_format == "pcm":
             cmd.extend(["-f", "s16le", "-acodec", "pcm_s16le"])
+        elif target_format == "wav":
+            cmd.extend(["-codec:a", "pcm_s16le"])
 
         cmd.append(output_path)
 
         result = subprocess.run(cmd, capture_output=True, timeout=30)
         if result.returncode != 0:
-            raise RuntimeError(f"ffmpeg error: {result.stderr.decode()[:100]}")
+            raise RuntimeError(f"ffmpeg error: {result.stderr.decode()[:200]}")
 
         with open(output_path, "rb") as f:
             return f.read()
 
     finally:
-        Path(wav_path).unlink(missing_ok=True)
+        Path(input_path).unlink(missing_ok=True)
         Path(output_path).unlink(missing_ok=True)
 
 

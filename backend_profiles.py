@@ -58,3 +58,12 @@ def get_profile(backend_name: str) -> dict:
 def needs_chunking(backend_name: str) -> bool:
     """Check if backend requires text chunking."""
     return get_profile(backend_name).get("needs_chunking", True)
+
+# Add Kokoro profile
+BACKEND_PROFILES["kokoro"] = {
+    "max_words": 200,
+    "max_chars": 1200,
+    "optimal_words": 150,
+    "needs_chunking": True,
+    "crossfade_ms": 30,
+}

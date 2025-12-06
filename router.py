@@ -39,6 +39,7 @@ class BackendRouter:
 
         # Import adapters - they handle missing dependencies gracefully
         from adapters import (
+            KokoroBackend,
             VibeVoiceBackend, HiggsBackend, OpenAudioBackend,
             VoxCPMBackend, KyutaiBackend, ElevenLabsBackend
         )
@@ -54,6 +55,8 @@ class BackendRouter:
             backends.append(VoxCPMBackend())
         if KyutaiBackend:
             backends.append(KyutaiBackend())
+        if KokoroBackend:
+            backends.append(KokoroBackend())
         if ElevenLabsBackend:
             backends.append(ElevenLabsBackend())
 

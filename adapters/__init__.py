@@ -64,3 +64,8 @@ __all__ = [
     "ElevenLabsBackend",
     "ELEVENLABS_VOICES",
 ]
+
+try:
+    from .kokoro import KokoroBackend
+except ImportError:
+    KokoroBackend = None

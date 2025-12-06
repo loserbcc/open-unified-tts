@@ -647,7 +647,7 @@ class TTSClientApp(App):
     async def action_refresh_api(self) -> None:
         """Refresh API connection and voice list."""
         self.update_status("Refreshing...")
-        await self.check_api_health()
+        self.check_api_health()  # @work handles scheduling
 
     async def action_show_help(self) -> None:
         """Show help information."""

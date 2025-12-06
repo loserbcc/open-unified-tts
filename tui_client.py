@@ -281,8 +281,19 @@ class TTSClientApp(App):
     }
 
     #text_input {
-        height: 1fr;
+        height: 10;
         border: solid $secondary;
+    }
+
+    #action_bar {
+        height: 3;
+        background: $surface;
+        padding: 0 1;
+        dock: bottom;
+    }
+
+    #action_bar Button {
+        margin: 0 1;
     }
 
     #controls_container {
@@ -352,6 +363,7 @@ class TTSClientApp(App):
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", priority=True),
         Binding("ctrl+g", "generate", "Generate", priority=True),
+        Binding("ctrl+o", "import_file", "Open File"),
         Binding("ctrl+r", "refresh_api", "Refresh API"),
         Binding("f1", "show_help", "Help"),
     ]
@@ -428,21 +440,10 @@ class TTSClientApp(App):
                                 Switch(value=self.autoplay, id="autoplay_switch"),
                             )
 
-                        # Plugins
-                        with Vertical(classes="control_group"):
-                            yield Label("Plugins (Experimental)", classes="control_label")
-                            with TabbedContent():
-                                for plugin in self.plugins:
-                                    with TabPane(plugin.name):
-                                        yield Label(plugin.get_description())
-                                        # Future: Add plugin-specific controls
-
-                        # Generate button
-                        yield Button(
-                            "Generate Speech",
-                            variant="primary",
-                            id="generate_btn",
-                        )
+            # Action bar (fixed at bottom)
+            with Horizontal(id="action_bar"):
+                yield Button("📂 Import File", id="import_btn")
+                yield Button("🎙️ Generate", variant="primary", id="generate_btn")
 
             # Status bar
             with Horizontal(id="status_bar"):
@@ -526,6 +527,71 @@ class TTSClientApp(App):
     def on_autoplay_changed(self, event: Switch.Changed) -> None:
         """Handle autoplay toggle."""
         self.autoplay = event.value
+
+    @on(Button.Pressed, "#import_btn")
+    async def on_import_pressed(self) -> None:
+        """Handle import button press."""
+        await self.action_import_file()
+
+    async def action_import_file(self) -> None:
+        """Import text from a file."""
+        # Simple file path input - prompt user
+        from pathlib import Path
+        import subprocess
+
+        # Use zenity or kdialog if available, otherwise prompt in status
+        try:
+            result = subprocess.run(
+                ["zenity", "--file-selection", "--title=Select Text File"],
+                capture_output=True, text=True, timeout=60
+            )
+            if result.returncode == 0:
+                file_path = result.stdout.strip()
+            else:
+                self.update_status("File selection cancelled")
+                return
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            # Fallback: just use a hardcoded test path for now
+            self.update_status("Tip: Ctrl+O to import. Put file path in text box, select all, paste.")
+            return
+
+        # Read and load the file
+        try:
+            path = Path(file_path)
+            if not path.exists():
+                self.update_status(f"File not found: {file_path}")
+                return
+
+            # Handle different file types
+            suffix = path.suffix.lower()
+            if suffix == ".pdf":
+                try:
+                    from pypdf import PdfReader
+                    reader = PdfReader(file_path)
+                    text = "\n\n".join(page.extract_text() or "" for page in reader.pages)
+                except ImportError:
+                    self.update_status("PDF support requires: pip install pypdf")
+                    return
+            elif suffix in [".docx", ".doc"]:
+                try:
+                    from docx import Document
+                    doc = Document(file_path)
+                    text = "\n\n".join(p.text for p in doc.paragraphs if p.text.strip())
+                except ImportError:
+                    self.update_status("DOCX support requires: pip install python-docx")
+                    return
+            else:
+                # Plain text
+                text = path.read_text(encoding="utf-8", errors="ignore")
+
+            # Load into text area
+            text_area = self.query_one("#text_input", TextArea)
+            text_area.text = text
+            word_count = len(text.split())
+            self.update_status(f"Loaded {word_count} words from {path.name}")
+
+        except Exception as e:
+            self.update_status(f"Error reading file: {str(e)}")
 
     @on(Button.Pressed, "#generate_btn")
     async def on_generate_pressed(self) -> None:

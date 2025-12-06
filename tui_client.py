@@ -545,8 +545,12 @@ class TTSClientApp(App):
         voice_select = self.query_one("#voice_select", Select)
         selected_voice = voice_select.value
 
-        if not selected_voice or selected_voice.startswith("_cat_"):
+        # Handle no selection or category headers
+        if selected_voice is Select.BLANK or not selected_voice:
             self.update_status("Error: Please select a voice")
+            return
+        if isinstance(selected_voice, str) and selected_voice.startswith("_cat_"):
+            self.update_status("Error: Please select a voice, not a category")
             return
 
         format_select = self.query_one("#format_select", Select)

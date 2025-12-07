@@ -16,3 +16,6 @@ scipy>=1.11.0
 
 # Environment configuration
 python-dotenv>=1.0.0
+
+# Gradio client for VieNeu Vietnamese TTS
+gradio_client>=0.10.0

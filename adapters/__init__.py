@@ -11,6 +11,7 @@ Included adapters:
 - Higgs - Generative voice creation from descriptions, ~15GB VRAM
 - VibeVoice - Real-time streaming TTS, ~2GB VRAM
 - ElevenLabs - Cloud TTS fallback, no GPU required
+- VieNeu - Vietnamese TTS, CPU-only, 10 voices (Docker)
 
 To add your own adapter:
 1. Create a class inheriting from TTSBackend
@@ -76,3 +77,9 @@ try:
     from .kokoro import KokoroBackend
 except ImportError:
     KokoroBackend = None
+
+try:
+    from .vieneu import VieNeuBackend, VIENEU_VOICES
+except ImportError:
+    VieNeuBackend = None
+    VIENEU_VOICES = {}

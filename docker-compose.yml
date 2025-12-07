@@ -1,0 +1,41 @@
+# Vietnamese TTS Docker Setup
+# Run with: docker compose up -d
+#
+# This starts:
+# 1. VieNeu-TTS engine (Vietnamese TTS, port 7860)
+# 2. Open Unified TTS proxy (OpenAI-compatible API, port 8765)
+
+services:
+  vieneu-tts:
+    build:
+      context: ./docker/vieneu
+      dockerfile: Dockerfile
+    container_name: vieneu-tts
+    ports:
+      - "7860:7860"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  unified-tts-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: unified-tts-proxy
+    ports:
+      - "8765:8765"
+    environment:
+      - VIENEU_HOST=vieneu-tts
+      - VIENEU_PORT=7860
+    depends_on:
+      vieneu-tts:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  default:
+    name: tts-network

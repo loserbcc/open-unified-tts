@@ -2,13 +2,15 @@
 
 An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with smart chunking for unlimited-length generation.
 
-**Tested Backends:** Kokoro, VibeVoice, OpenAudio S1-mini, FishTTS, VoxCPM, MiniMax TTS, Chatterbox, Higgs Audio, Kyutai/Moshi, ACE-Step (singing/musical TTS)
+**Tested Backends:** Kokoro, VibeVoice, OpenAudio S1-mini, FishTTS, VoxCPM, VoxCPM 1.5, MiniMax TTS, Chatterbox, Higgs Audio, Kyutai/Moshi, ACE-Step (singing/musical TTS)
 
 **[Watch the Intro](demo/intro.mp4)** - 30-second overview of what this does.
 
 **[Live Demo (4 min)](demo/live_demo.mp4)** - Screen recording showing the chunking and stitching in action with multi-voice narration.
 
 **[Kokoro Audiobook Demo](demo/kokoro_audiobook_demo.mp3)** - 73-second audiobook sample generated with Kokoro (`bf_emma` voice), demonstrating chunked generation and seamless stitching. [Details](demo/kokoro_demo_info.md)
+
+**[VoxCPM 1.5 Demo](demo/voxcpm15_intro_morgan.mp3)** - Morgan Freeman voice explaining VoxCPM 1.5's 44.1kHz high-quality output.
 
 **[Rough Demo Audio (bad voice samples)](demo/demo_rough_samples.mp3)** - Audio-only version. Uses hastily-grabbed voice samples - your results will be better with proper reference audio.
 
@@ -292,6 +294,7 @@ This means short requests are fast and efficient, while long requests maintain q
 | **Kokoro** | Neural TTS | 50+ built-in | Quick start, no setup, high quality |
 | `openaudio` | Voice Clone | Custom | Cloning specific voices |
 | `voxcpm` | Voice Clone | Custom | High-quality voice cloning |
+| `voxcpm15` | Voice Clone | 88+ pre-loaded | 44.1kHz output, lighter VRAM (~8GB) |
 | `fishtts` | Voice Clone | Custom | Fish Speech synthesis |
 | `chatterbox` | Voice Clone | Custom | Emotion control |
 | `kyutai` | Emotion | 8 emotions | Emotional expression |
@@ -324,6 +327,14 @@ Each backend has a profile defining its capabilities:
     "optimal_words": 50,
     "needs_chunking": True,
     "crossfade_ms": 50,
+},
+"voxcpm15": {
+    "max_words": 150,       # Handles longer chunks
+    "max_chars": 800,
+    "optimal_words": 100,
+    "needs_chunking": True,
+    "crossfade_ms": 50,
+    "sample_rate": 44100,   # 2x quality of VoxCPM
 }
 ```
 
@@ -364,6 +375,7 @@ All configuration via environment variables:
 KOKORO_HOST=http://localhost:8880
 OPENAUDIO_URL=http://localhost:8080
 VOXCPM_URL=http://localhost:7860
+VOXCPM15_HOST=http://mother:7870  # VoxCPM 1.5 (44.1kHz)
 FISHTTS_URL=http://localhost:7861
 KYUTAI_URL=http://localhost:8086
 HIGGS_URL=http://localhost:8085
@@ -398,6 +410,7 @@ open-unified-tts/
 │   ├── kokoro.py       # Kokoro neural TTS (50+ voices)
 │   ├── openaudio.py    # OpenAudio/Fish Speech S1-mini
 │   ├── voxcpm.py       # VoxCPM voice cloning
+│   ├── voxcpm15.py     # VoxCPM 1.5 (44.1kHz, 88+ voices)
 │   ├── fishtts.py      # FishTTS
 │   ├── kyutai.py       # Kyutai/Moshi emotions
 │   ├── higgs.py        # Higgs Audio generative
@@ -407,8 +420,9 @@ open-unified-tts/
 ├── docs/
 │   └── kokoro_setup_guide.md  # Kokoro setup documentation
 └── demo/
-    ├── kokoro_audiobook_demo.mp3  # Sample output
-    └── kokoro_demo_info.md        # Demo details
+    ├── kokoro_audiobook_demo.mp3  # Kokoro sample output
+    ├── kokoro_demo_info.md        # Demo details
+    └── voxcpm15_intro_morgan.mp3  # VoxCPM 1.5 Morgan demo
 ```
 
 ## Performance

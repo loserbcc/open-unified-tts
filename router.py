@@ -41,7 +41,7 @@ class BackendRouter:
         from adapters import (
             KokoroBackend,
             VibeVoiceBackend, HiggsBackend, OpenAudioBackend,
-            VoxCPMBackend, KyutaiBackend, ElevenLabsBackend
+            VoxCPMBackend, VoxCPM15Backend, KyutaiBackend, ElevenLabsBackend
         )
 
         # Add backends in priority order
@@ -53,6 +53,8 @@ class BackendRouter:
             backends.append(OpenAudioBackend())
         if VoxCPMBackend:
             backends.append(VoxCPMBackend())
+        if VoxCPM15Backend:
+            backends.append(VoxCPM15Backend())
         if KyutaiBackend:
             backends.append(KyutaiBackend())
         if KokoroBackend:

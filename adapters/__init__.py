@@ -6,6 +6,7 @@ Each adapter implements the TTSBackend interface.
 Included adapters:
 - OpenAudio (Fish Speech) - Voice cloning, ~5GB VRAM
 - VoxCPM - High-quality character cloning via Gradio, ~18GB VRAM
+- VoxCPM 1.5 - Higher quality cloning via OpenAI API, ~8GB VRAM, 44.1kHz
 - Kyutai (Moshi) - Emotional TTS presets, ~4GB VRAM
 - Higgs - Generative voice creation from descriptions, ~15GB VRAM
 - VibeVoice - Real-time streaming TTS, ~2GB VRAM
@@ -28,6 +29,11 @@ try:
     from .voxcpm import VoxCPMBackend
 except ImportError:
     VoxCPMBackend = None
+
+try:
+    from .voxcpm15 import VoxCPM15Backend
+except ImportError:
+    VoxCPM15Backend = None
 
 try:
     from .kyutai import KyutaiBackend, KYUTAI_VOICES
@@ -56,6 +62,7 @@ __all__ = [
     "TTSBackend",
     "OpenAudioBackend",
     "VoxCPMBackend",
+    "VoxCPM15Backend",
     "KyutaiBackend",
     "KYUTAI_VOICES",
     "HiggsBackend",

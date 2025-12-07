@@ -75,3 +75,13 @@ BACKEND_PROFILES["kokoro"] = {
     "needs_chunking": True,
     "crossfade_ms": 30,
 }
+
+# Add Qwen3-TTS profile (multilingual: EN, ZH, VI, JA, KO, FR, Tamil)
+BACKEND_PROFILES["qwen3_tts"] = {
+    "max_words": 100,
+    "max_chars": 500,
+    "optimal_words": 75,
+    "needs_chunking": True,
+    "crossfade_ms": 50,
+    "sample_rate": 24000,
+}

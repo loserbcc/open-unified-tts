@@ -70,9 +70,15 @@ __all__ = [
     "VIBEVOICE_VOICES",
     "ElevenLabsBackend",
     "ELEVENLABS_VOICES",
+    "Qwen3TTSBackend",
 ]
 
 try:
     from .kokoro import KokoroBackend
 except ImportError:
     KokoroBackend = None
+
+try:
+    from .qwen3_tts import Qwen3TTSBackend
+except ImportError:
+    Qwen3TTSBackend = None

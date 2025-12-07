@@ -41,7 +41,8 @@ class BackendRouter:
         from adapters import (
             KokoroBackend,
             VibeVoiceBackend, HiggsBackend, OpenAudioBackend,
-            VoxCPMBackend, VoxCPM15Backend, KyutaiBackend, ElevenLabsBackend
+            VoxCPMBackend, VoxCPM15Backend, KyutaiBackend, ElevenLabsBackend,
+            Qwen3TTSBackend
         )
 
         # Add backends in priority order
@@ -59,6 +60,8 @@ class BackendRouter:
             backends.append(KyutaiBackend())
         if KokoroBackend:
             backends.append(KokoroBackend())
+        if Qwen3TTSBackend:
+            backends.append(Qwen3TTSBackend())  # Multilingual TTS on Mother:7871
         if ElevenLabsBackend:
             backends.append(ElevenLabsBackend())
 

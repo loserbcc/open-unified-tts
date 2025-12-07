@@ -19,6 +19,14 @@ BACKEND_PROFILES = {
         "needs_chunking": True,
         "crossfade_ms": 50,
     },
+    "voxcpm15": {
+        "max_words": 150,
+        "max_chars": 800,
+        "optimal_words": 100,
+        "needs_chunking": True,
+        "crossfade_ms": 50,
+        "sample_rate": 44100,  # Higher quality output
+    },
     "kyutai": {
         "max_words": 40,
         "max_chars": 250,

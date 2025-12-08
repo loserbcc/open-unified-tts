@@ -3,7 +3,7 @@
 Moshi: https://github.com/kyutai-labs/moshi
 - ~4GB VRAM
 - Emotion presets (happy, sad, calm, etc.)
-- Multiple host failover support
+- Fleet discovery via fleet_config.py (if present)
 """
 import logging
 import os
@@ -14,6 +14,12 @@ import requests
 from .base import TTSBackend
 
 logger = logging.getLogger(__name__)
+
+# Try to import fleet config, fall back to single default
+try:
+    from fleet_config import KYUTAI_HOSTS as FLEET_HOSTS
+except ImportError:
+    FLEET_HOSTS = [{"name": "default", "url": "http://localhost:8087"}]
 
 # Emotion presets (not voice cloning)
 KYUTAI_VOICES = {
@@ -30,12 +36,15 @@ KYUTAI_VOICES = {
 
 
 class KyutaiBackend(TTSBackend):
-    """Kyutai/Moshi emotional TTS backend."""
+    """Kyutai/Moshi emotional TTS backend with fleet auto-discovery."""
 
     def __init__(self, hosts: list = None):
         if hosts is None:
-            host_str = os.environ.get("KYUTAI_HOSTS", "http://localhost:8899")
-            hosts = [{"name": "default", "url": host_str}]
+            env_hosts = os.environ.get("KYUTAI_HOSTS")
+            if env_hosts:
+                hosts = [{"name": "env", "url": env_hosts}]
+            else:
+                hosts = FLEET_HOSTS
         self.hosts = hosts
         self._active_host: Optional[dict] = None
 

@@ -26,3 +26,4 @@ Thumbs.db
 # Project specific
 *.log
 voice_prefs.json
+fleet_config.py

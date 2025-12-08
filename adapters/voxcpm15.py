@@ -1,10 +1,11 @@
 """VoxCPM 1.5 adapter - High-quality voice cloning via OpenAI-compatible API.
 
-VoxCPM 1.5 runs on Mother's RTX PRO 6000 Blackwell GPU:
+VoxCPM 1.5 features:
 - 44.1kHz sample rate (2x improvement over VoxCPM)
 - ~8GB VRAM (lighter than original VoxCPM)
 - 88+ character voices pre-loaded
 - OpenAI-compatible API endpoint
+- Fleet discovery via fleet_config.py (if present)
 """
 import logging
 import os
@@ -16,12 +17,19 @@ from .base import TTSBackend
 
 logger = logging.getLogger(__name__)
 
+# Try to import fleet config, fall back to single default
+try:
+    from fleet_config import VOXCPM15_HOSTS as FLEET_HOSTS
+except ImportError:
+    FLEET_HOSTS = ["http://localhost:7870"]
+
 
 class VoxCPM15Backend(TTSBackend):
-    """VoxCPM 1.5 (Tokenizer-free Voice Cloning) via OpenAI-compatible API."""
+    """VoxCPM 1.5 (Tokenizer-free Voice Cloning) via OpenAI-compatible API with fleet discovery."""
 
     def __init__(self, host: str = None):
-        self.host = (host or os.environ.get("VOXCPM15_HOST", "http://mother:7870")).rstrip("/")
+        self._explicit_host = host or os.environ.get("VOXCPM15_HOST")
+        self._discovered_host = None
         self._voices = None
 
     @property
@@ -36,13 +44,46 @@ class VoxCPM15Backend(TTSBackend):
     def vram_gb(self) -> int:
         return 8  # Much lighter on Blackwell
 
-    def is_available(self) -> bool:
-        """Check if VoxCPM 1.5 endpoint is responding."""
+    @property
+    def host(self) -> str:
+        """Return the active host (explicit, discovered, or triggers discovery)."""
+        if self._explicit_host:
+            return self._explicit_host.rstrip("/")
+        if self._discovered_host:
+            return self._discovered_host
+        # Auto-discover on first access
+        self._discovered_host = self._discover_host()
+        return self._discovered_host or FLEET_HOSTS[0]
+
+    def _check_host(self, host: str) -> bool:
+        """Check if a specific host has VoxCPM 1.5 available."""
         try:
-            r = httpx.get(f"{self.host}/health", timeout=3)
+            r = httpx.get(f"{host}/health", timeout=2)
             return r.status_code == 200
         except Exception:
             return False
+
+    def _discover_host(self) -> str | None:
+        """Find first available VoxCPM 1.5 host in fleet."""
+        for host in FLEET_HOSTS:
+            if self._check_host(host):
+                logger.info(f"VoxCPM 1.5 discovered at {host}")
+                return host
+        return None
+
+    def is_available(self) -> bool:
+        """Check if VoxCPM 1.5 endpoint is responding."""
+        # If explicit host set, only check that
+        if self._explicit_host:
+            return self._check_host(self._explicit_host.rstrip("/"))
+
+        # Try cached discovered host first
+        if self._discovered_host and self._check_host(self._discovered_host):
+            return True
+
+        # Discover across fleet
+        self._discovered_host = self._discover_host()
+        return self._discovered_host is not None
 
     def get_voices(self) -> list[str]:
         """Get list of available voices from server."""

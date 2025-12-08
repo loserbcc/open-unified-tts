@@ -71,6 +71,8 @@ __all__ = [
     "ElevenLabsBackend",
     "ELEVENLABS_VOICES",
     "Qwen3TTSBackend",
+    "Maya1Backend",
+    "MAYA1_VOICES",
 ]
 
 try:
@@ -82,3 +84,9 @@ try:
     from .qwen3_tts import Qwen3TTSBackend
 except ImportError:
     Qwen3TTSBackend = None
+
+try:
+    from .maya1 import Maya1Backend, MAYA1_VOICES
+except ImportError:
+    Maya1Backend = None
+    MAYA1_VOICES = {}

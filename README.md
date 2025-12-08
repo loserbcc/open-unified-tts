@@ -32,6 +32,42 @@ An OpenAI-compatible TTS API that unifies multiple text-to-speech backends with 
 
 > **Instant Integration:** Because this is OpenAI TTS-compatible, it plugs directly into tools you already use - [OpenWebUI](https://github.com/open-webui/open-webui), [SillyTavern](https://github.com/SillyTavern/SillyTavern), or any app with OpenAI TTS support. Point them at this API, connect your backends (Higgs Audio, VoxCPM, ElevenLabs, whatever), and you've got a production audio studio. No code changes needed.
 
+## 🌐 Zero-Setup Option: Hosted SaaS
+
+**Don't want to self-host?** Use our hosted API at [lessfortts.loser.com](https://lessfortts.loser.com):
+
+- **67+ Kokoro voices** + character clones (Morgan Freeman, Rick & Morty, Yoda, etc.)
+- **OpenAI-compatible API** - drop-in replacement
+- **Free during alpha** - no credit card required
+
+```bash
+# Just point at the hosted API instead of localhost
+curl -X POST https://lessfortts.loser.com/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -d '{"voice":"bf_emma","input":"Hello from the cloud!"}' \
+  -o test.mp3
+```
+
+> **Coming Soon:** API keys and MCP access tokens. Currently in dev/testing - free access while we build out authentication. Want early access? Email buddy@loser.com.
+
+### MCP Integration (AI-Native Interface)
+
+Use TTS directly from Claude, Cline, Cursor, or any MCP-compatible AI:
+
+```bash
+# See the simple studio version for the MCP server
+git clone https://github.com/loserbcc/open-tts-studio.git
+cd open-tts-studio/mcp-server
+uv sync
+claude mcp add unified-tts-simple uv run python server.py
+```
+
+Then just ask your AI: *"Read this article aloud with Emma's voice"* - no API calls needed.
+
+**[Full MCP documentation →](https://github.com/loserbcc/open-tts-studio#-mcp-server---the-ai-native-interface)**
+
+---
+
 ## Why This Exists
 
 Most TTS models have strict length limits:

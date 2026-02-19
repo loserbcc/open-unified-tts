@@ -48,6 +48,13 @@ BACKEND_PROFILES = {
         "needs_chunking": False,  # Cloud handles it
         "crossfade_ms": 0,
     },
+    "modelslab": {
+        "max_words": 2500,
+        "max_chars": 15000,
+        "optimal_words": 500,
+        "needs_chunking": False,  # Cloud handles it
+        "crossfade_ms": 0,
+    },
     "vibevoice": {
         "max_words": 100,
         "max_chars": 500,

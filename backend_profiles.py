@@ -92,3 +92,13 @@ BACKEND_PROFILES["qwen3_tts"] = {
     "crossfade_ms": 50,
     "sample_rate": 24000,
 }
+
+# Add Pocket-TTS profile (lightweight local engine, laptop-class GPUs)
+BACKEND_PROFILES["pocket_tts"] = {
+    "max_words": 100,
+    "max_chars": 500,
+    "optimal_words": 75,
+    "needs_chunking": True,
+    "crossfade_ms": 50,
+    "sample_rate": 24000,
+}

@@ -12,6 +12,7 @@ Included adapters:
 - VibeVoice - Real-time streaming TTS, ~2GB VRAM
 - ElevenLabs - Cloud TTS fallback, no GPU required
 - Typecast - Cloud TTS with emotion and prosody control, no GPU required
+- Pocket-TTS - Lightweight local TTS for laptop-class GPUs, ~4GB VRAM
 
 To add your own adapter:
 1. Create a class inheriting from TTSBackend
@@ -75,6 +76,7 @@ __all__ = [
     "Maya1Backend",
     "MAYA1_VOICES",
     "TypecastBackend",
+    "PocketTTSBackend",
 ]
 
 try:
@@ -97,3 +99,8 @@ try:
     from .typecast import TypecastBackend
 except ImportError:
     TypecastBackend = None
+
+try:
+    from .pocket_tts import PocketTTSBackend
+except ImportError:
+    PocketTTSBackend = None

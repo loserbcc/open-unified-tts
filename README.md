@@ -259,6 +259,10 @@ POST /v1/voice-prefs/morgan
 > personal stack favors Qwen3-TTS and OmniVoice over VoxCPM for new
 > work. The voxcpm-flavored backends still work for anyone running them,
 > they just aren't where active polish is happening.
+>
+> **Need a backend that isn't here?** Open a [Backend Request issue](https://github.com/loserbcc/open-unified-tts/issues/new?template=backend-request.yml)
+> and we'll wire it up — or send a PR using one of the existing
+> adapters in `adapters/` as a template.
 
 ### Supported Backends
 
@@ -266,6 +270,7 @@ POST /v1/voice-prefs/morgan
 |---------|------|--------|----------|-------|
 | **Kokoro** | Neural TTS | 67 built-in | Quick start, high quality, no GPU | [Guide](docs/kokoro_setup_guide.md) |
 | **Qwen3-TTS** | Neural TTS | Multilingual | Local-first, high-quality, multilingual | Requires GPU |
+| **Pocket-TTS** | Neural TTS | 8 builtin + clones | Lightweight, laptop-class GPUs | ~4GB VRAM |
 | `openaudio` | Voice Clone | Custom | Cloning specific voices | Requires separate setup |
 | `voxcpm` | Voice Clone | Custom | High-quality voice cloning | Requires GPU |
 | `voxcpm15` | Voice Clone | 88+ pre-loaded | 44.1kHz output, lighter VRAM | Requires GPU |

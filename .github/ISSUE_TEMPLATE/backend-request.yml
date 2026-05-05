@@ -1,0 +1,74 @@
+name: Backend Request
+description: Request a new TTS backend adapter
+title: "[Backend] "
+labels: ["backend-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Open Unified TTS is connector-agnostic by design. If you'd like a
+        backend wired up, drop the details below. Adapter PRs are welcome
+        too — see existing files in `adapters/` for the pattern.
+
+  - type: input
+    id: backend-name
+    attributes:
+      label: Backend name
+      description: What is this TTS engine called?
+      placeholder: e.g. "VoxCPM 2", "Pocket-TTS", "Some Cloud Provider"
+    validations:
+      required: true
+
+  - type: input
+    id: project-url
+    attributes:
+      label: Project URL or API docs
+      description: Link to the engine's repo or API documentation
+      placeholder: https://github.com/...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: backend-type
+    attributes:
+      label: Type
+      options:
+        - Local (runs on your hardware)
+        - Cloud (API-based)
+        - Hybrid
+    validations:
+      required: true
+
+  - type: input
+    id: api-shape
+    attributes:
+      label: API shape
+      description: Is it OpenAI-compatible? Custom REST? Gradio? gRPC?
+      placeholder: "OpenAI-compatible: POST /v1/audio/speech with {input, voice, format}"
+    validations:
+      required: true
+
+  - type: textarea
+    id: voice-model
+    attributes:
+      label: Voice model
+      description: Built-in voices, voice cloning from reference, voice design from text, etc.
+      placeholder: "8 built-in voices + voice cloning from 10-30s reference audio"
+    validations:
+      required: true
+
+  - type: textarea
+    id: vram-or-pricing
+    attributes:
+      label: VRAM (local) or pricing tier (cloud)
+      placeholder: "~4GB VRAM" or "$5 / 1M chars"
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: Auth model, quirks, why you want this backend, willingness to contribute the adapter yourself
+    validations:
+      required: false

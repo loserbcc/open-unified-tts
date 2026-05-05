@@ -63,7 +63,7 @@ Common pain points:
 
 | I want to... | Use this |
 |--------------|----------|
-| Just try it (no setup) | [Hosted demo](https://lessfortts.loser.com) - Free during alpha |
+| Just try it (no setup) | [Hosted demo](https://tts.scrappylabs.ai) - Free during alpha |
 | Simple web UI + API | [Open TTS Studio](https://github.com/loserbcc/open-tts-studio) - Most users start here |
 | Raw API with multi-backend | This repo (instructions below) |
 | Terminal UI | `./tui_client.py` after setup |
@@ -248,15 +248,24 @@ POST /v1/voice-prefs/morgan
 
 **Just starting?** → Kokoro (easiest setup, 67 voices, CPU-friendly)
 
-**Need voice cloning?** → See [BACKENDS.md](docs/BACKENDS.md) for VoxCPM and other options
+**Local-first with quality?** → **Qwen3-TTS** (multilingual, native voices, runs on consumer GPUs)
+
+**Need voice cloning?** → See [BACKENDS.md](docs/BACKENDS.md) for the various clone-capable backends.
 
 **Want everything?** → Run multiple backends and let the router choose automatically
+
+> **Note on backend preference (2026):** the project deliberately stays
+> connector-agnostic — that's the point — but the maintainer's current
+> personal stack favors Qwen3-TTS and OmniVoice over VoxCPM for new
+> work. The voxcpm-flavored backends still work for anyone running them,
+> they just aren't where active polish is happening.
 
 ### Supported Backends
 
 | Backend | Type | Voices | Best For | Setup |
 |---------|------|--------|----------|-------|
 | **Kokoro** | Neural TTS | 67 built-in | Quick start, high quality, no GPU | [Guide](docs/kokoro_setup_guide.md) |
+| **Qwen3-TTS** | Neural TTS | Multilingual | Local-first, high-quality, multilingual | Requires GPU |
 | `openaudio` | Voice Clone | Custom | Cloning specific voices | Requires separate setup |
 | `voxcpm` | Voice Clone | Custom | High-quality voice cloning | Requires GPU |
 | `voxcpm15` | Voice Clone | 88+ pre-loaded | 44.1kHz output, lighter VRAM | Requires GPU |
@@ -264,7 +273,10 @@ POST /v1/voice-prefs/morgan
 | `chatterbox` | Voice Clone | Custom | Emotion control | Requires separate setup |
 | `kyutai` | Emotion | 8 emotions | Emotional expression | Requires separate setup |
 | `higgs` | Generative | Scene-based | Creative voice generation | Requires GPU |
+| `maya1` | Voice Design | Custom | Emotional TTS, voice design | Requires GPU |
 | `vibevoice` | Streaming | Microsoft | Real-time TTS | Requires separate setup |
+| `modelslab` | Cloud | Multiple | Cloud TTS, voice cloning | API key required |
+| `typecast` | Cloud | Custom | Emotion + prosody control | API key required |
 | `minimax` | Cloud | Professional | Production voices | API key required |
 | `acestep` | Musical | Singing | Music/vocals | Requires GPU |
 | `elevenlabs` | Cloud | Many | Fallback/variety | API key required |
@@ -376,7 +388,7 @@ python tui_client.py
 
 ## Hosted SaaS Option
 
-**Don't want to self-host?** Use our hosted API at [lessfortts.loser.com](https://lessfortts.loser.com):
+**Don't want to self-host?** Use our hosted API at [tts.scrappylabs.ai](https://tts.scrappylabs.ai):
 
 - **67+ Kokoro voices** + character clones (Morgan Freeman, Rick & Morty, Yoda, etc.)
 - **OpenAI-compatible API** - drop-in replacement
@@ -384,7 +396,7 @@ python tui_client.py
 
 ```bash
 # Just point at the hosted API instead of localhost
-curl -X POST https://lessfortts.loser.com/v1/audio/speech \
+curl -X POST https://tts.scrappylabs.ai/v1/audio/speech \
   -H "Content-Type: application/json" \
   -d '{"voice":"bf_emma","input":"Hello from the cloud!"}' \
   -o test.mp3
@@ -392,21 +404,31 @@ curl -X POST https://lessfortts.loser.com/v1/audio/speech \
 
 > **Coming Soon:** API keys and MCP access tokens. Currently in dev/testing - free access while we build out authentication. Want early access? Email buddy@loser.com.
 
-### MCP Integration (AI-Native Interface)
+### AI-Native Integration
 
-Use TTS directly from Claude, Cline, Cursor, or any MCP-compatible AI:
+Use TTS directly from Claude Code, Cline, Cursor, or any AI agent.
+
+**Recommended (2026): wrap the API as a Claude Code Skill.** Skills are
+lighter-weight than MCP servers — a single Markdown file describes the
+trigger, and the skill calls the OpenAI-compatible endpoint with `curl`
+or `httpx`. No long-running process, no MCP wire protocol overhead, just
+a prompt-time tool. The maintainer's fleet wraps this exact API as a
+`/speak` skill (see [k2-fsa/OmniVoice](https://github.com/k2-fsa/OmniVoice)
+and the skill examples in the [Anthropic skill cookbook](https://github.com/anthropics/skills)).
+
+The legacy MCP path still works if you prefer it:
 
 ```bash
-# See the simple studio version for the MCP server
+# Legacy MCP server (still functional, no longer the recommended pattern)
 git clone https://github.com/loserbcc/open-tts-studio.git
 cd open-tts-studio/mcp-server
 uv sync
 claude mcp add unified-tts-simple uv run python server.py
 ```
 
-Then just ask your AI: *"Read this article aloud with Emma's voice"* - no API calls needed.
+Then just ask your AI: *"Read this article aloud with Emma's voice"* — no API calls needed.
 
-**[Full MCP documentation →](https://github.com/loserbcc/open-tts-studio#-mcp-server---the-ai-native-interface)**
+**[Legacy MCP docs →](https://github.com/loserbcc/open-tts-studio#-mcp-server---the-ai-native-interface)**
 
 ## Architecture
 

@@ -11,6 +11,7 @@ Included adapters:
 - Higgs - Generative voice creation from descriptions, ~15GB VRAM
 - VibeVoice - Real-time streaming TTS, ~2GB VRAM
 - ElevenLabs - Cloud TTS fallback, no GPU required
+- Typecast - Cloud TTS with emotion and prosody control, no GPU required
 
 To add your own adapter:
 1. Create a class inheriting from TTSBackend
@@ -73,6 +74,7 @@ __all__ = [
     "Qwen3TTSBackend",
     "Maya1Backend",
     "MAYA1_VOICES",
+    "TypecastBackend",
 ]
 
 try:
@@ -90,3 +92,8 @@ try:
 except ImportError:
     Maya1Backend = None
     MAYA1_VOICES = {}
+
+try:
+    from .typecast import TypecastBackend
+except ImportError:
+    TypecastBackend = None

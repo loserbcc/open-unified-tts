@@ -42,7 +42,7 @@ class BackendRouter:
             KokoroBackend,
             VibeVoiceBackend, HiggsBackend, OpenAudioBackend,
             VoxCPMBackend, VoxCPM15Backend, KyutaiBackend, ElevenLabsBackend,
-            Qwen3TTSBackend, Maya1Backend
+            Qwen3TTSBackend, Maya1Backend, TypecastBackend
         )
 
         # Add backends in priority order
@@ -66,6 +66,8 @@ class BackendRouter:
             backends.append(Maya1Backend())  # Emotional TTS with voice design, port 8090
         if ElevenLabsBackend:
             backends.append(ElevenLabsBackend())
+        if TypecastBackend:
+            backends.append(TypecastBackend())
 
         return backends
 

@@ -137,7 +137,9 @@ class KokoroBackend(TTSBackend):
             r = requests.get(f"{self.host}/v1/audio/voices", timeout=5)
             r.raise_for_status()
             data = r.json()
-            return data.get("voices", [])
+            # Kokoro-FastAPI v0.4.0+ returns [{"id": "...", "name": "..."}];
+            # earlier versions returned plain strings. Normalize to ids.
+            return [v["id"] if isinstance(v, dict) else v for v in data.get("voices", [])]
         except Exception as e:
             logger.warning(f"Failed to fetch voices from Kokoro: {e}")
             # Fallback to hardcoded list

@@ -1,12 +1,15 @@
+> **⚠️ Archived — no longer maintained.**
+>
+> This project routed across a dozen TTS backends I no longer run. I can't test changes against
+> them, and I won't ship fixes I can't verify. The code stays here under Apache-2.0 and the repo
+> stays readable — **fork it freely**, several people already have.
+>
+> Current ScrappyLabs TTS work ships as open weights on Hugging Face:
+> [**scrappy-voice-1**](https://huggingface.co/scrappylabsai/scrappy-voice-1) · [**scrappy-voice-family-1**](https://huggingface.co/scrappylabsai/scrappy-voice-family-1) · [**warble**](https://huggingface.co/scrappylabsai/warble) · [**try it in your browser**](https://huggingface.co/spaces/scrappylabsai/scrappy-voice-tts)
+
 # Open Unified TTS
 
 One API to rule them all - unlimited-length TTS with automatic chunking.
-
-> **Also from ScrappyLabs** — our current text-to-speech work ships as open weights on Hugging Face:
-> [**scrappy-voice-1**](https://huggingface.co/scrappylabsai/scrappy-voice-1) and the
-> [**scrappy-voice-family-1**](https://huggingface.co/scrappylabsai/scrappy-voice-family-1) set
-> (Apache-2.0), plus [**warble**](https://huggingface.co/scrappylabsai/warble).
-> Try them in your browser: [**scrappy-voice-tts**](https://huggingface.co/spaces/scrappylabsai/scrappy-voice-tts).
 
 ## The Problem
 
